@@ -1,17 +1,17 @@
-# dotfiles / skitalex
-
-Личные конфиги, синхронизируемые между macOS и Fedora.
-
-## Helix (`helix/`)
+# helix
 
 Конфиг редактора [Helix](https://helix-editor.com), заточенный под DevOps:
 Go/Rust + YAML (K8s-схемы через schemastore), Terraform/HCL, Dockerfile,
 Bash (shellcheck/shfmt), JSON, TOML, Markdown.
 
+Синхронизируется между macOS и Fedora. Живёт в `~/dev/skitalex/helix` —
+`skitalex` — общая папка под разные репозитории (не репо сама по себе),
+`helix/` — этот репозиторий внутри неё.
+
 ### Установка на новой машине
 
 ```bash
-git clone <url-этого-репо> ~/dev/skitalex
+git clone <url-этого-репо> ~/dev/skitalex/helix
 rm -rf ~/.config/helix
 ln -s ~/dev/skitalex/helix ~/.config/helix
 ```
@@ -59,3 +59,6 @@ cargo install taplo-cli --locked --features lsp
 Правим файлы прямо в `~/dev/skitalex/helix/` (это и есть `~/.config/helix`,
 через симлинк), коммитим и пушим как обычный git-репозиторий. На втором
 компьютере — `git pull`.
+
+Другие репозитории кладём рядом, в `~/dev/skitalex/<repo>` — у каждого
+свой `.git`, друг на друга не влияют.
