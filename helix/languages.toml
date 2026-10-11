@@ -1,0 +1,213 @@
+# ~/.config/helix/languages.toml
+
+# ─────────────────────────────────────────────────────────────
+# rust-analyzer — настройки LSP
+# ─────────────────────────────────────────────────────────────
+[language-server.rust-analyzer.config]
+# Гонять clippy вместо обычного `cargo check` — больше полезных подсказок
+check.command = "clippy"
+check.extraArgs = ["--", "-W", "clippy::all"]
+
+# Учитывать все фичи крейта при анализе
+cargo.features = "all"
+cargo.buildScripts.enable = true
+
+# Процедурные макросы (нужно многим крейтам: serde, tokio, sqlx, …)
+procMacro.enable = true
+
+# Автоимпорт и полноценное автодополнение
+completion.autoimport.enable = true
+completion.fullFunctionSignatures.enable = true
+
+# Inlay hints (сам показ включается в config.toml: display-inlay-hints = true)
+inlayHints.bindingModeHints.enable = true
+inlayHints.closureReturnTypeHints.enable = "with_block"
+inlayHints.discriminantHints.enable = "fieldless"
+inlayHints.lifetimeElisionHints.enable = "skip_trivial"
+inlayHints.lifetimeElisionHints.useParameterNames = true
+inlayHints.closingBraceHints.minLines = 25
+inlayHints.parameterHints.enable = true
+inlayHints.typeHints.enable = true
+
+# Подсвечивать активные параметры в сигнатуре
+signatureInfo.detail = "full"
+signatureInfo.documentation.enable = true
+
+# ─────────────────────────────────────────────────────────────
+# Язык Rust
+# ─────────────────────────────────────────────────────────────
+[[language]]
+name = "rust"
+auto-format = true
+language-servers = ["rust-analyzer"]
+# Форматирование делает rust-analyzer через rustfmt — edition он берёт
+# из Cargo.toml проекта сам, поэтому явный `formatter` не нужен.
+
+
+# ─────────────────────────────────────────────────────────────
+# gopls — настройки LSP
+# ─────────────────────────────────────────────────────────────
+[language-server.gopls.config]
+# Форматирование по правилам gofumpt (строже, чем gofmt; бинарь не нужен —
+# gopls его вендорит)
+gofumpt = true
+
+# Автодополнение
+usePlaceholders = true          # подставлять параметры-заглушки в вызовах
+completeUnimported = true       # дополнять символы из ещё не импортированных пакетов
+completionBudget = "100ms"
+
+# Диагностики
+staticcheck = true              # набор проверок staticcheck прямо в gopls
+vulncheck = "Imports"           # предупреждать об уязвимых зависимостях (govulncheck)
+
+[language-server.gopls.config.analyses]
+unusedparams = true
+unusedwrite = true
+unusedvariable = true
+nilness = true
+useany = true
+shadow = true
+
+# Inlay hints (сам показ — в config.toml: display-inlay-hints = true)
+[language-server.gopls.config.hints]
+assignVariableTypes = true
+compositeLiteralFields = true
+compositeLiteralTypes = true
+constantValues = true
+functionTypeParameters = true
+parameterNames = true
+rangeVariableTypes = true
+
+# ─────────────────────────────────────────────────────────────
+# golangci-lint как отдельный LSP (даёт диагностики всего набора линтеров)
+# нужен бинарь: go install github.com/nametake/golangci-lint-langserver@latest
+# ─────────────────────────────────────────────────────────────
+[language-server.golangci-lint-lsp]
+command = "golangci-lint-langserver"
+
+[language-server.golangci-lint-lsp.config]
+# golangci-lint v2: JSON выводится через --output.json.path
+command = ["golangci-lint", "run", "--output.json.path", "stdout", "--show-stats=false", "--issues-exit-code=1"]
+
+# ─────────────────────────────────────────────────────────────
+# Язык Go
+# ─────────────────────────────────────────────────────────────
+[[language]]
+name = "go"
+auto-format = true
+language-servers = ["gopls", "golangci-lint-lsp"]
+
+[[language]]
+name = "gomod"
+auto-format = true
+language-servers = ["gopls"]
+
+[[language]]
+name = "gotmpl"
+language-servers = ["gopls"]
+
+[[language]]
+name = "gowork"
+language-servers = ["gopls"]
+
+# ═══════════════════════════════════════════════════════════════
+# DevOps-стек: YAML / K8s / Ansible / Terraform / Docker / Bash
+# ═══════════════════════════════════════════════════════════════
+
+# ─────────────────────────────────────────────────────────────
+# yaml-language-server — схемы (K8s, GitHub Actions, Docker Compose, ...)
+# бинарь: npm i -g yaml-language-server
+# ─────────────────────────────────────────────────────────────
+[language-server.yaml-language-server.config.yaml]
+format.enable = true
+validate = true
+hover = true
+completion = true
+# Автоматически подхватывает схемы из schemastore.org по имени файла
+# (например docker-compose.yml, .github/workflows/*.yml) — главный
+# кайф для DevOps, схему K8s руками указывать не нужно.
+schemaStore.enable = true
+schemaStore.url = "https://www.schemastore.org/api/json/catalog.json"
+
+[language-server.yaml-language-server.config.yaml.schemas]
+"kubernetes" = ["*.k8s.yaml", "*.k8s.yml", "k8s/**/*.yaml", "k8s/**/*.yml", "manifests/**/*.yaml", "deploy/**/*.yaml"]
+
+# ─────────────────────────────────────────────────────────────
+# ansible-language-server — отдельно от обычного YAML глобально не
+# включаем (ломает автодополнение для не-ansible yaml). Если открыт
+# Ansible-проект, быстро переключить сервер для текущего буфера:
+#   :set-language yaml
+#   :lsp-restart   (после смены language-servers в этом файле на
+#                   ["ansible-language-server"] для секции [[language]] name = "yaml")
+# либо держать отдельный `languages.toml` в корне ansible-репо —
+# helix подхватывает локальный конфиг рядом с проектом.
+# бинарь: npm i -g @ansible/ansible-language-server
+# ─────────────────────────────────────────────────────────────
+
+[[language]]
+name = "yaml"
+auto-format = true
+language-servers = ["yaml-language-server"]
+indent = { tab-width = 2, unit = "  " }
+
+# ─────────────────────────────────────────────────────────────
+# terraform-ls — Terraform / HCL
+# бинарь: brew install hashicorp/tap/terraform-ls  (или terraform-ls отдельно)
+# форматирование делает сам terraform-ls через `terraform fmt`
+# ─────────────────────────────────────────────────────────────
+[language-server.terraform-ls.config]
+terraform.validation.enable = true
+
+[[language]]
+name = "hcl"
+auto-format = true
+language-servers = ["terraform-ls"]
+indent = { tab-width = 2, unit = "  " }
+
+# ─────────────────────────────────────────────────────────────
+# Dockerfile
+# бинарь: npm i -g dockerfile-language-server-nodejs
+# ─────────────────────────────────────────────────────────────
+[[language]]
+name = "dockerfile"
+language-servers = ["docker-langserver"]
+
+[[language]]
+name = "docker-compose"
+language-servers = ["yaml-language-server"]
+indent = { tab-width = 2, unit = "  " }
+
+# ─────────────────────────────────────────────────────────────
+# Bash / shell-скрипты — LSP + shellcheck (диагностика) + shfmt (формат)
+# бинари: npm i -g bash-language-server; brew install shellcheck shfmt
+# ─────────────────────────────────────────────────────────────
+[language-server.bash-language-server.config.bashIde]
+shellcheckPath = "shellcheck"
+
+[[language]]
+name = "bash"
+auto-format = true
+language-servers = ["bash-language-server"]
+formatter = { command = "shfmt", args = ["-i", "2", "-ci"] }
+
+# ─────────────────────────────────────────────────────────────
+# JSON / TOML / Markdown — форматтеры и схемы из коробки
+# бинари: npm i -g vscode-langservers-extracted (json)
+#         cargo install taplo-cli --features lsp (toml)
+#         brew install marksman (markdown)
+# ─────────────────────────────────────────────────────────────
+[[language]]
+name = "json"
+auto-format = true
+language-servers = ["vscode-json-language-server"]
+
+[[language]]
+name = "toml"
+auto-format = true
+language-servers = ["taplo"]
+
+[[language]]
+name = "markdown"
+language-servers = ["marksman"]
+soft-wrap = { enable = true }

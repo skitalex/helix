@@ -1,0 +1,77 @@
+theme = "onedark"
+
+[editor]
+line-number = "relative"
+cursorline = true
+color-modes = true
+idle-timeout = 50
+auto-completion = true
+auto-format = true
+auto-save = false
+bufferline = "multiple"
+rulers = [80, 120]
+true-color = true
+
+# Отступы критичны в YAML/Terraform — сразу видно табы и висящие пробелы
+[editor.whitespace.render]
+tab = "all"
+trailing-space = "all"
+
+[editor.indent-guides]
+render = true
+character = "│"
+
+[editor.cursor-shape]
+normal = "block"
+insert = "bar"
+select = "underline"
+
+# Подсказки прямо в коде (inlay hints) — мастхэв для Go!
+[editor.lsp]
+display-messages = true
+display-inlay-hints = true
+auto-signature-help = true
+
+# File picker (Ctrl-t / space f)
+[editor.file-picker]
+hidden = true
+
+# Soft-wrap
+[editor.soft-wrap]
+enable = true
+max-wrap = 25
+max-indent-retain = 40
+
+[editor.statusline]
+left = ["mode", "spinner", "file-name", "file-modification-indicator"]
+center = ["version-control"]
+right = ["diagnostics", "selections", "register", "position", "file-encoding"]
+
+
+[keys.normal]
+# Навигация по коду (как в VS Code / GoLand)
+g = {a = "goto_definition", r = "goto_reference", i = "goto_implementation",y = "goto_type_definition"}
+K   = "hover"
+"C-k" = "signature_help"
+
+# Быстрое сохранение и форматирование
+"C-s" = ":w"
+"C-S-s" = [":format", ":w"]
+
+# Закрытие и буферы
+"C-q" = ":buffer-close"
+"C-w" = ":buffer-close"
+"%"   = "match_brackets"
+
+# Поиск и навигация (всё в одном "space")
+"space" = {a = "code_action", r = "rename_symbol", f = "file_picker", b = "buffer_picker", s = "symbol_picker", "/" = "global_search"}
+
+# Меню `m` (match) оставлено дефолтным — это магия Helix:
+#   mi" / ma(  — выделить внутри / вокруг кавычек, скобок, слова (miw), абзаца (mip)
+#   ms( / md( / mr([  — обернуть / снять / заменить обёртку (surround)
+#   mm  — прыжок на парную скобку
+# Отдельный прыжок на скобку продублирован на "%" (см. выше).
+
+[keys.insert]
+"C-s" = "normal_mode"
+"j" = { k = "normal_mode" }
